@@ -4,6 +4,10 @@ LLM_MODELS = [
     "mistral:latest"
 ]
 
+# Base URL of the local Ollama server. On-prem/free by design — points
+# at localhost so no data ever leaves the machine running this app.
+OLLAMA_BASE_URL = "http://localhost:11434"
+
 # The prompt that will be used to query the LLM model. This prompt is designed to instruct the model on how to respond to user queries about music ONLY.
 LLM_PROMPT = """
     You are a helpful assistant that can answer questions about music.
@@ -15,8 +19,12 @@ LLM_PROMPT = """
 
     You should be able to answer ANY question related to music.
 
-    Format: Users at times may or may not specify the format in which they want the answer.
-    If they do, you should follow that format. If they don't, you should provide the answer in a clear and concise manner.
+    Format: Users may specify an exact output format. Follow it precisely.
+    For lyrics, translations, or paired-language requests, preserve the requested
+    line breaks and put each requested language on its own line. If the user asks
+    for Italian followed by English, output one Italian line and the English
+    translation on the next line in parentheses. Do not merge multiple lines into
+    one paragraph. If no format is specified, answer clearly and concisely.
 
     Here is the user's question. Follow all instructions strictly before answering:\n\n
 """
