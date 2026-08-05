@@ -1,3 +1,6 @@
 langchain
 streamlit
 langchain-ollama
+streamlit-audiorecorder
+pillow
+openai-whisper
