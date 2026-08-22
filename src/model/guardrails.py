@@ -83,6 +83,19 @@ class MusicGuardrail:
 
         return not self.MUSIC_KEYWORDS.isdisjoint(tokens)
 
+    def is_explicitly_non_music(self, text: str) -> bool:
+        """Detect phrases that strongly indicate a non-music topic."""
+        if not text or not text.strip():
+            return False
+
+        non_music_keywords = {
+            "who made you", "developer", "engineer", "math", "history", "zero",
+            "politics", "president", "prime minister", "country", "movie",
+            "actor", "actress", "film", "book", "novel", "science", "research",
+        }
+        normalized = text.lower()
+        return any(phrase in normalized for phrase in non_music_keywords)
+
     def get_refusal_message(self) -> str:
         """
         Canned, on-brand refusal message for off-topic questions.

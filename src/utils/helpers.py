@@ -127,17 +127,18 @@ def make_chat_title(first_message: str, max_length: int = 40) -> str:
 def innovation_to_temperature(innovation_percent: int) -> float:
     """
     Convert the UI's "Innovation" percentage (0-100) into an LLM
-    temperature value (0.0-1.0).
+    temperature value used for responses.
 
     Args:
         innovation_percent: Integer percentage from the UI slider.
 
     Returns:
-        float: Temperature value, clamped to the valid 0.0-1.0 range.
+        float: Temperature value, clamped to 0.0-0.15 for accuracy.
     """
     # Clamp to defensive bounds in case the UI ever sends a bad value.
     clamped = max(0, min(100, innovation_percent))
-    return round(clamped / 100, 2)
+    temperature = round(clamped / 100, 2)
+    return min(temperature, 0.15)
 
 
 def list_json_files(directory: str) -> list:

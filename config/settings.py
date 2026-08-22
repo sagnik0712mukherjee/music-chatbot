@@ -3,29 +3,14 @@
 # includes a short hover description for non-technical users.
 MODEL_OPTIONS = [
     {
-        "id": "llama3.1:latest",
-        "label": "The Chatur One",
-        "info": "Smart and balanced for music reasoning, lyric edits, and structured prompts. It can be a little slower on long creative flows.",
-    },
-    {
-        "id": "mistral:latest",
+        "id": "qwen3.6:35b-a3b",
         "label": "The Thinker",
-        "info": "Fast and sharp, great for punchy style prompts and quick lyric variations. It may sometimes be more literal than poetic.",
+        "info": "Large-scale reasoning for precise structure, key theory, and polished music guidance.",
     },
     {
-        "id": "mistral-instruct:latest",
-        "label": "The Composer",
-        "info": "Good for guided songwriting prompts, tone, and format-sensitive output. It is slightly less wide-ranging than the biggest reasoning models.",
-    },
-    {
-        "id": "llama2:13b:latest",
-        "label": "The Sound Coach",
-        "info": "Comfortable with creative direction and musical advice. It is reasonably efficient but may be less detailed on overly technical topics.",
-    },
-    {
-        "id": "llama2:7b:latest",
+        "id": "deepseek-r1:14b",
         "label": "The Maestro",
-        "info": "A smaller, more efficient Maestro that still delivers polished style and richer musical advice without the heavy 70B compute cost.",
+        "info": "Creative, accurate music generation with strong style and lyric fidelity.",
     },
 ]
 
@@ -37,22 +22,26 @@ OLLAMA_BASE_URL = "http://localhost:11434"
 
 # The prompt that will be used to query the LLM model. This prompt is designed to instruct the model on how to respond to user queries about music ONLY.
 LLM_PROMPT = """
-    You are a helpful assistant that can answer questions about music.
-    You have access to a music knowledge base and can provide information about artists, albums, songs, and genres, prompts for STYLES and LYRICS SECTION of SUNO and alike softwares; so pretty much everything about Music.
-    You can also provide recommendations based on user preferences.
+    You are a strict music assistant. Your only job is to answer music-related questions.
+    Answer questions about lyrics, composition, songwriting, music theory, genres,
+    production, notation, and music prompts. If a user asks anything outside of
+    music, respond exactly: "I don't know." Do not add any extra explanation.
 
-    However, the core of your knowledge is based on the music knowledge base, so if you don't know the answer to a question, you should say "I don't know" instead of making up an answer.
-    If the topic is NOT related to music, you should answer only: "I don't know." Do not provide additional unrelated information.
-    If the user provides an image or audio prompt, assume any extracted text from that upload is the user's message and evaluate whether it is music-related.
+    When answering music questions, do not hallucinate. If you do not know the
+    answer with confidence, respond exactly: "I don't know." Do not invent facts,
+    song lyrics, artist biographies, chord formulas, or key relationships.
 
-    You should be able to answer ANY question related to music.
+    If a user asks you to verify or correct your answer, do not blindly accept the
+    correction. Instead say: "I will verify that, but my internal knowledge says..."
+    and then provide a strictly supported answer or "I don't know." Do not change
+    answers based solely on user assertions.
 
-    Format: Users may specify an exact output format. Follow it precisely.
-    For lyrics, translations, or paired-language requests, preserve the requested
-    line breaks and put each requested language on its own line. If the user asks
-    for Italian followed by English, output one Italian line and the English
-    translation on the next line in parentheses. Do not merge multiple lines into
-    one paragraph. If no format is specified, answer clearly and concisely.
+    If the user provides an image or audio prompt, treat any extracted text as the
+    user's message and determine whether it is music-related.
+
+    Format: Follow the user's requested format exactly. For lyrics or translation
+    requests, preserve line breaks and place each requested language on its own line.
+    If no format is specified, answer clearly and concisely.
 
     Here is the user's question. Follow all instructions strictly before answering:
 
@@ -86,6 +75,6 @@ def model_labels() -> list:
 
 # The parameters for the LLM model. These parameters can be adjusted to change the behavior of the model.
 default_model_params = {
-    "temperature": 0.30,
+    "temperature": 0.08,
     "max_new_tokens": 1024
 }

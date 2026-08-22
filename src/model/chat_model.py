@@ -56,9 +56,12 @@ class MusicChatModel:
         if not self.guardrail.is_music_related(user_message) and not self._has_music_context(chat):
             return self.guardrail.get_refusal_message()
 
+        if self.guardrail.is_explicitly_non_music(user_message):
+            return self.guardrail.get_refusal_message()
+
         system_prompt = self._build_system_prompt(chat)
         messages = self._build_messages(system_prompt, chat, user_message)
-        llm = self._build_llm(chat)
+        llm = self._build_llm(chat, user_message)
 
         try:
             response = llm.invoke(messages)
@@ -132,23 +135,38 @@ class MusicChatModel:
             messages.append(HumanMessage(content=user_message))
         return messages
 
-    def _build_llm(self, chat) -> ChatOllama:
+    def _build_llm(self, chat, user_message: str) -> ChatOllama:
         """
         Construct a ChatOllama client configured for this chat's chosen
         model and Innovation (temperature) setting.
 
         Args:
             chat: The ChatMemory for the current conversation.
+            user_message: The incoming user message.
 
         Returns:
             ChatOllama: Ready to call .invoke() on.
         """
+        temperature = innovation_to_temperature(chat.innovation)
+        if self._should_use_strict_mode(user_message):
+            temperature = min(temperature, 0.03)
+
         return ChatOllama(
             model=chat.model_name,
-            temperature=innovation_to_temperature(chat.innovation),
+            temperature=temperature,
             num_predict=default_model_params["max_new_tokens"],
             base_url=OLLAMA_BASE_URL,
         )
+
+    def _should_use_strict_mode(self, user_message: str) -> bool:
+        """Use the lowest temperature for factual, theory, or validation queries."""
+        signal_words = [
+            "what is", "who is", "notes", "scale", "chord", "relative minor",
+            "relative major", "key", "measure", "harmony", "tempo", "bpm",
+            "notation", "music theory", "translate", "lyrics", "write", "compose",
+        ]
+        normalized = user_message.lower()
+        return any(signal in normalized for signal in signal_words)
 
     def _build_error_message(self, chat, error: Exception) -> str:
         """
